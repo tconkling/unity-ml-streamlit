@@ -1,0 +1,22 @@
+# IDE files
+*.idea
+
+# Python stuff
+__pycache__
+venv/
+
+# Frontend stuff
+yarn.lock
+node_modules/
+
+# Stuff that Unity will regenerate
+*.csproj
+*.sln
+
+# Unity
+Temp/
+Obj/
+Library/
+UserSettings/
+UnityPlayer_Symbols.pdb
+WinPixEventRuntime.dll
