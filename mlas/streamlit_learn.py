@@ -16,6 +16,8 @@ from mlagents.trainers.training_status import GlobalTrainingStatus
 from mlagents_envs.side_channel.engine_configuration_channel import EngineConfig
 from mlagents_envs.timers import hierarchical_timer
 
+from mlas.stats import StreamlitStatsWriter
+
 
 def run_training(run_seed: int, options: RunOptions) -> None:
     """
@@ -69,6 +71,7 @@ def run_training(run_seed: int, options: RunOptions) -> None:
         StatsReporter.add_writer(csv_writer)
         StatsReporter.add_writer(gauge_write)
         StatsReporter.add_writer(console_writer)
+        StatsReporter.add_writer(StreamlitStatsWriter())
 
         if env_settings.env_path is None:
             port = None

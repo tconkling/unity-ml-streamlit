@@ -7,9 +7,12 @@ from mlas import streamlit_learn
 
 config_path = st.text_input("config file", value="config/rollerball_config.yaml")
 run_id = st.text_input("Run ID", value="RollerBall")
+force = st.checkbox("Overwrite Existing")
 
 if st.button("Train!"):
     options = streamlit_learn.get_run_options(config_path, run_id)
+    options.checkpoint_settings.force = force
+
     run_seed = options.env_settings.seed
     if run_seed == -1:
         run_seed = np.random.randint(0, 10000)
