@@ -17,10 +17,10 @@ from mlagents.trainers.training_status import GlobalTrainingStatus
 from mlagents_envs.side_channel.engine_configuration_channel import EngineConfig
 from mlagents_envs.timers import hierarchical_timer
 
-from mlas.stats import StreamlitStatsWriter
+from mlas.stats import StatsQueueWriter
 
 
-def run_training(run_seed: int, options: RunOptions, command_queue: Queue) -> None:
+def run_training(run_seed: int, options: RunOptions, stats_queue: Queue) -> None:
     """
     Launches training session.
     :param options: parsed command line arguments
@@ -72,7 +72,7 @@ def run_training(run_seed: int, options: RunOptions, command_queue: Queue) -> No
         StatsReporter.add_writer(csv_writer)
         StatsReporter.add_writer(gauge_write)
         StatsReporter.add_writer(console_writer)
-        StatsReporter.add_writer(StreamlitStatsWriter(command_queue))
+        StatsReporter.add_writer(StatsQueueWriter(stats_queue))
 
         if env_settings.env_path is None:
             port = None
