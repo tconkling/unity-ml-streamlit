@@ -1,4 +1,5 @@
 import os
+from queue import Queue
 from typing import Dict, Any, Optional
 
 import attr
@@ -19,7 +20,7 @@ from mlagents_envs.timers import hierarchical_timer
 from mlas.stats import StreamlitStatsWriter
 
 
-def run_training(run_seed: int, options: RunOptions) -> None:
+def run_training(run_seed: int, options: RunOptions, command_queue: Queue) -> None:
     """
     Launches training session.
     :param options: parsed command line arguments
@@ -71,7 +72,7 @@ def run_training(run_seed: int, options: RunOptions) -> None:
         StatsReporter.add_writer(csv_writer)
         StatsReporter.add_writer(gauge_write)
         StatsReporter.add_writer(console_writer)
-        StatsReporter.add_writer(StreamlitStatsWriter())
+        StatsReporter.add_writer(StreamlitStatsWriter(command_queue))
 
         if env_settings.env_path is None:
             port = None

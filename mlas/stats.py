@@ -1,4 +1,5 @@
 import time
+from queue import Queue
 from typing import Dict, Any
 
 import streamlit as st
@@ -6,11 +7,15 @@ from mlagents.trainers.stats import StatsWriter, StatsSummary, StatsPropertyType
 
 
 class StreamlitStatsWriter(StatsWriter):
-    def __init__(self):
+    def __init__(self, command_queue: Queue):
         self.training_start_time = time.time()
         # If self-play, we want to print ELO as well as reward
         self.self_play = False
         self.self_play_team = -1
+        self.command_queue = command_queue
+
+    def write(self, *args):
+        self.command_queue.put(lambda: st.write(*args))
 
     def write_stats(
         self, category: str, values: Dict[str, StatsSummary], step: int
@@ -24,7 +29,7 @@ class StreamlitStatsWriter(StatsWriter):
         if "Environment/Cumulative Reward" in values:
             stats_summary = values["Environment/Cumulative Reward"]
             time_elapsed = time.time() - self.training_start_time
-            st.write(
+            self.write(
                 f"{category}: Step: {step}. "
                 f"Time Elapsed: {time_elapsed:0.3f} s "
                 f"Mean Reward: {stats_summary.mean:0.3f}"
@@ -32,9 +37,9 @@ class StreamlitStatsWriter(StatsWriter):
             )
             if self.self_play and "Self-play/ELO" in values:
                 elo_stats = values["Self-play/ELO"]
-                st.write(f"{category} ELO: {elo_stats.mean:0.3f}. ")
+                self.write(f"{category} ELO: {elo_stats.mean:0.3f}. ")
         else:
-            st.write(
+            self.write(
                f"{category}: Step: {step}. No episode was completed since last summary. {is_training}"
             )
 
@@ -42,8 +47,8 @@ class StreamlitStatsWriter(StatsWriter):
         self, category: str, property_type: StatsPropertyType, value: Any
     ) -> None:
         if property_type == StatsPropertyType.HYPERPARAMETERS:
-            st.write(f"Hyperparameters for behavior name {category}:")
-            st.write(value)
+            self.write(f"Hyperparameters for behavior name {category}:")
+            self.write(value)
         elif property_type == StatsPropertyType.SELF_PLAY:
             assert isinstance(value, bool)
             self.self_play = value
