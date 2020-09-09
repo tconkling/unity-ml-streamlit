@@ -7,7 +7,7 @@ import altair as alt
 import pandas as pd
 import numpy as np
 import streamlit as st
-from streamlit.ReportThread import add_report_ctx
+from streamlit.report_thread import add_report_ctx
 
 from mlas import streamlit_learn
 from mlas.stats import StatsEntry

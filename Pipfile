@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-mlagents = "==0.18.0"
+mlagents = "~=0.19"
 streamlit = "*"
 
 [requires]

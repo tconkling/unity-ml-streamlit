@@ -9,7 +9,7 @@ from mlagents.trainers.exception import TrainerConfigError
 from mlagents.trainers.learn import write_run_options, write_timing_tree, write_training_status, \
     create_environment_factory
 from mlagents.trainers.settings import RunOptions
-from mlagents.trainers.stats import GaugeWriter, ConsoleWriter, TensorboardWriter, CSVWriter, StatsReporter
+from mlagents.trainers.stats import GaugeWriter, ConsoleWriter, TensorboardWriter, StatsReporter
 from mlagents.trainers.subprocess_env_manager import SubprocessEnvManager
 from mlagents.trainers.trainer_controller import TrainerController
 from mlagents.trainers.trainer_util import TrainerFactory, handle_existing_directories
@@ -54,22 +54,12 @@ def run_training(run_seed: int, options: RunOptions, stats_queue: Queue) -> None
             GlobalTrainingStatus.load_state(
                 os.path.join(run_logs_dir, "training_status.json")
             )
-        # Configure CSV, Tensorboard Writers and StatsReporter
-        # We assume reward and episode length are needed in the CSV.
-        csv_writer = CSVWriter(
-            write_path,
-            required_fields=[
-                "Environment/Cumulative Reward",
-                "Environment/Episode Length",
-            ],
-        )
         tb_writer = TensorboardWriter(
             write_path, clear_past_data=not checkpoint_settings.resume
         )
         gauge_write = GaugeWriter()
         console_writer = ConsoleWriter()
         StatsReporter.add_writer(tb_writer)
-        StatsReporter.add_writer(csv_writer)
         StatsReporter.add_writer(gauge_write)
         StatsReporter.add_writer(console_writer)
         StatsReporter.add_writer(StatsQueueWriter(stats_queue))
