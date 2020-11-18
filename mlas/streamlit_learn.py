@@ -1,21 +1,34 @@
+# Re-implements mlagents/trainers/learn.py in Streamlit
+
 import os
 from queue import Queue
-from typing import Dict, Any, Optional
+from typing import Dict, Any
+from typing import Optional
 
 import attr
+import mlagents.trainers
 import mlagents.trainers.cli_utils
+from mlagents.trainers.cli_utils import DetectDefault
+from mlagents.trainers.directory_utils import validate_existing_directories
 from mlagents.trainers.environment_parameter_manager import EnvironmentParameterManager
 from mlagents.trainers.exception import TrainerConfigError
 from mlagents.trainers.learn import write_run_options, write_timing_tree, write_training_status, \
     create_environment_factory
 from mlagents.trainers.settings import RunOptions
-from mlagents.trainers.stats import GaugeWriter, ConsoleWriter, TensorboardWriter, StatsReporter
+from mlagents.trainers.stats import (
+    TensorboardWriter,
+    StatsReporter,
+    GaugeWriter,
+    ConsoleWriter,
+)
 from mlagents.trainers.subprocess_env_manager import SubprocessEnvManager
+from mlagents.trainers.trainer import TrainerFactory
 from mlagents.trainers.trainer_controller import TrainerController
-from mlagents.trainers.trainer_util import TrainerFactory, handle_existing_directories
 from mlagents.trainers.training_status import GlobalTrainingStatus
 from mlagents_envs.side_channel.engine_configuration_channel import EngineConfig
-from mlagents_envs.timers import hierarchical_timer
+from mlagents_envs.timers import (
+    hierarchical_timer,
+)
 
 from mlas.stats import StatsQueueWriter
 
@@ -41,7 +54,7 @@ def run_training(run_seed: int, options: RunOptions, stats_queue: Queue) -> None
         run_logs_dir = os.path.join(write_path, "run_logs")
         port: Optional[int] = env_settings.base_port
         # Check if directory exists
-        handle_existing_directories(
+        validate_existing_directories(
             write_path,
             checkpoint_settings.resume,
             checkpoint_settings.force,
@@ -54,6 +67,8 @@ def run_training(run_seed: int, options: RunOptions, stats_queue: Queue) -> None
             GlobalTrainingStatus.load_state(
                 os.path.join(run_logs_dir, "training_status.json")
             )
+
+        # Configure Tensorboard Writers and StatsReporter
         tb_writer = TensorboardWriter(
             write_path, clear_past_data=not checkpoint_settings.resume
         )
@@ -90,14 +105,15 @@ def run_training(run_seed: int, options: RunOptions, stats_queue: Queue) -> None
         )
 
         trainer_factory = TrainerFactory(
-            options.behaviors,
-            write_path,
-            not checkpoint_settings.inference,
-            checkpoint_settings.resume,
-            run_seed,
-            env_parameter_manager,
-            maybe_init_path,
-            False,
+            trainer_config=options.behaviors,
+            output_path=write_path,
+            train_model=not checkpoint_settings.inference,
+            load_model=checkpoint_settings.resume,
+            seed=run_seed,
+            param_manager=env_parameter_manager,
+            init_path=maybe_init_path,
+            multi_gpu=False,
+            force_torch="torch" in DetectDefault.non_default_args,
         )
         # Create controller and begin training.
         tc = TrainerController(

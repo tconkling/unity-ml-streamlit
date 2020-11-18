@@ -13,6 +13,17 @@ Inference:
 - *Don't* run Streamlit
 - Just open the Unity scene and press Play.
 
+## Notes (11/18/2020)
+
+- `streamlit_learn` reimplements the `mlagents-learn` utility.
+    - (`mlagents/trainers/learn.py: main()`)
+- Need to update this whenever things change, annoyingly
+- What we want to do:
+    - Create a _single_ tensorflow session
+    - When the app is re-run, reconnect if there's an existing session
+    - Give the ability to interrupt that session
+- Create `st.singleton`, using state?
+
 ## Notes
 
 - I always struggle with creating nice charts! Need to get more fluent at `pd.DataFrame`.
